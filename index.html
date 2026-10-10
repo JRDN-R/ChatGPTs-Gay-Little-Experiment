@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#11131a">
+  <title>Face Logo · Apple Adaptive Glyph Lab</title>
+  <style>
+    :root { color-scheme:dark; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:#f5f6fa; background:#0e1016; font-size:15px; line-height:1.48; padding:env(safe-area-inset-top) 16px max(48px,env(safe-area-inset-bottom)); }
+    main { max-width:590px; margin:0 auto; }
+    header { padding:34px 0 18px; }
+    .eyebrow { font-size:11px; text-transform:uppercase; letter-spacing:2px; font-weight:750; color:#8fa3ff; }
+    h1 { margin:7px 0 5px; font-size:27px; line-height:1.18; letter-spacing:-.7px; }
+    h2 { font-size:16px; margin:0 0 10px; }
+    .sub,.muted { color:#a3a9ba; }
+    .sub { margin:0; }
+    .panel { border:1px solid #303541; background:#181b23; border-radius:17px; margin:14px 0; padding:19px; }
+    .preview { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px; }
+    .preview figure { margin:0; min-width:0; text-align:center; }
+    .preview .tile { display:flex; justify-content:center; align-items:center; border-radius:13px; min-height:145px; }
+    .preview .dark { background:#08090c; }
+    .preview .light { background:#e5e8ee; }
+    .preview img { width:126px; height:126px; object-fit:contain; }
+    figcaption { font-size:11px; color:#abb1be; margin-top:7px; }
+    .indicator { font-size:13px; padding:12px; background:#242936; border-radius:10px; margin-top:16px; overflow-wrap:break-word; }
+    .indicator[data-kind=good] { color:#c7fbd6; background:#18352a; }
+    .indicator[data-kind=warn] { color:#ffe3a0; background:#3b301c; }
+    .editor { color:#fff; background:#101218; border:1px solid #4a5063; border-radius:13px; padding:14px; min-height:74px; font-size:24px; line-height:1.8; margin:12px 0; outline-offset:3px; user-select:text; -webkit-user-select:text; }
+    .editor picture { display:inline; vertical-align:middle; }
+    .editor img { display:inline-block; vertical-align:-.22em; height:1.25em; width:1.25em; object-fit:contain; }
+    .actions { display:flex; gap:9px; flex-wrap:wrap; }
+    button,.linkbutton { appearance:none; border:0; border-radius:11px; padding:12px 13px; font:inherit; font-weight:680; background:#6f8bff; color:#0e162e; text-decoration:none; cursor:pointer; min-height:43px; }
+    button.secondary,.linkbutton.secondary { color:#e6e9f2; background:#323848; }
+    button:active,.linkbutton:active { transform:scale(.985); }
+    ol { padding-left:23px; margin:10px 0 0; }
+    li+li { margin-top:8px; }
+    .tiny { font-size:12px; color:#a9afbd; margin:12px 0 0; }
+    .status { font-size:12px; color:#d1d8eb; margin:12px 0 0; min-height:19px; overflow-wrap:anywhere; }
+    .note { border-left:3px solid #8999fc; padding-left:12px; color:#b7bfce; font-size:13px; }
+    a { color:#a8baff; overflow-wrap:anywhere; }
+    code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.88em; }
+    footer { margin:26px 0; color:#8f96a5; font-size:12px; text-align:center; }
+  </style>
+</head>
+<body>
+<main>
+<header>
+  <div class="eyebrow">Apple adaptive image glyph · experimental</div>
+  <h1>Your logo, as an inline graphic</h1>
+  <p class="sub">An iPhone copy-and-paste experiment. No Mac or special keyboard required for this browser test.</p>
+</header>
+<section class="panel">
+  <h2>1 · Your original artwork</h2>
+  <p class="muted">These are real transparent PNGs, not text art.</p>
+  <div class="preview">
+    <figure><div class="tile dark"><img src="./Logo_White_320.png" alt="White line drawing of smiling face logo"></div><figcaption>Light logo on dark</figcaption></figure>
+    <figure><div class="tile light"><img src="./Logo_DarkInk_800.png" alt="Dark line drawing of smiling face logo"></div><figcaption>Dark logo on light</figcaption></figure>
+  </div>
+  <div class="indicator" id="glyphStatus" role="status">Checking for the encoded Apple HEIC glyph…</div>
+</section>
+<section class="panel">
+  <h2>2 · Copy this line into iMessage</h2>
+  <p class="muted">This inline image uses a special WebKit <code>picture</code> source when the generated HEIC is present.</p>
+  <div id="editor" class="editor" contenteditable="true" role="textbox" aria-label="Experimental inline logo"><span>My logo </span><picture id="glyphPicture"><img src="./Logo_White_320.png" alt="winking face logo"></picture><span> works?</span></div>
+  <div class="actions">
+    <button type="button" id="select">Select full line</button>
+    <button type="button" class="secondary" id="copyNative">Try copy</button>
+    <button type="button" class="secondary" id="copyHTML">Copy rich HTML</button>
+  </div>
+  <p id="copyStatus" class="status" role="status">For the most faithful clipboard test: tap Select full line, then use iOS's native Copy menu.</p>
+  <ol>
+    <li>Open this page in <strong>Safari</strong> on the iPhone.</li>
+    <li>Tap <strong>Select full line</strong>, then choose <strong>Copy</strong> from the iOS selection menu. If unavailable, try the two copy buttons.</li>
+    <li>Open a conversation in <strong>Messages</strong>, long-press its text field, tap <strong>Paste</strong>.</li>
+    <li>See whether the face behaves like a small inline emoji, a regular photo, text-only, or disappears.</li>
+  </ol>
+  <p class="tiny">A button reporting “copied” only means a clipboard operation was attempted or accepted. It does <strong>not</strong> verify that Messages received a native adaptive glyph.</p>
+</section>
+<section class="panel">
+  <h2>3 · Inspect the underlying files</h2>
+  <p class="muted">The HEIC is generated from your PNG on a GitHub-hosted Mac. You can save it, but sharing the HEIC as a file is not the same thing as copying a glyph into text.</p>
+  <div class="actions">
+    <a class="linkbutton secondary" href="./Logo_AdaptiveGlyph.heic" download>Download test HEIC</a>
+    <a class="linkbutton secondary" href="./Logo_White_320.png" download>Download PNG</a>
+  </div>
+</section>
+<section class="panel">
+  <h2>What would count as success?</h2>
+  <p class="note">The face appears as <strong>one inline graphic inside the Messages text bubble</strong> and remains visible when received by another compatible iPhone. This would be richer than a plain-text Unicode character, and other apps may still paste only a fallback image or description.</p>
+  <p class="tiny">Apple documents reading and preserving existing <code>NSAdaptiveImageGlyph</code> values. A developer experiment suggests HEIC + metadata can be recognized by the text system. Copying a hand-authored WebKit <code>picture</code> element into Messages is <strong>unproven</strong>. If this browser route fails, a signed native iPhone app using Apple's text APIs is the next test.</p>
+</section>
+<footer>Independent experiment · not affiliated with Apple · <a href="https://github.com/JRDN-R/ChatGPTs-Gay-Little-Experiment">view source on GitHub</a></footer>
+</main>
+<script>
+'use strict';
+const $ = (id) => document.getElementById(id);
+function show(id, value, kind) {
+  const node = $(id);
+  node.textContent = value;
+  if (kind) node.dataset.kind = kind;
+}
+function selectEditor() {
+  $('editor').focus();
+  const range = document.createRange();
+  range.selectNodeContents($('editor'));
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
+  show('copyStatus', 'The line is selected. Use the native Copy menu (long-press the selection) to preserve rich content.');
+}
+$('select').addEventListener('click', selectEditor);
+$('copyNative').addEventListener('click', () => {
+  selectEditor();
+  try {
+    const accepted = document.execCommand('copy');
+    show('copyStatus', accepted
+      ? 'Safari reported that the selection was copied. Paste into Messages to check what survived.'
+      : 'Safari refused the scripted copy. Use the native selection menu → Copy.');
+  } catch (error) {
+    show('copyStatus', 'Scripted copy unsupported. Long-press the selected line and use Copy.');
+  }
+});
+$('copyHTML').addEventListener('click', async () => {
+  if (!navigator.clipboard || !window.ClipboardItem) {
+    show('copyStatus', 'This Safari version does not support ClipboardItem. Try the native Copy option.');
+    return;
+  }
+  const markup = '<span>My logo </span>' + $('glyphPicture').outerHTML + '<span> works?</span>';
+  const blob = new Blob([markup], { type: 'text/html' });
+  try {
+    await navigator.clipboard.write([new ClipboardItem({
+      'text/html': blob,
+      'text/plain': new Blob(['My logo [face] works?'], {type: 'text/plain'})
+    })]);
+    show('copyStatus', 'Rich HTML was placed on the clipboard. Paste into Messages. It may still be converted to a normal image.');
+  } catch (error) {
+    show('copyStatus', 'Rich HTML copy was rejected (' + String(error.name || error) + '). Try native Copy.');
+  }
+});
+(async function detectGlyph() {
+  try {
+    const response = await fetch('./Logo_AdaptiveGlyph.heic', { method: 'HEAD', cache: 'no-store' });
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    const source = document.createElement('source');
+    source.srcset = './Logo_AdaptiveGlyph.heic';
+    source.type = 'image/x-apple-adaptive-glyph';
+    $('glyphPicture').insertBefore(source, $('glyphPicture').firstChild);
+    show('glyphStatus', 'HEIC found. The page is using Apple's adaptive-glyph picture source for the copy test. Recognition by Messages is not yet confirmed.', 'good');
+  } catch (error) {
+    show('glyphStatus', 'HEIC is missing. The image shown in the editor is only the PNG fallback. Check the GitHub Actions run.', 'warn');
+  }
+})();
+</script>
+</body>
+</html>
