@@ -1,52 +1,59 @@
-# Winking face logo → Apple adaptive image glyph experiment
+# Custom face → Apple adaptive image glyph lab
 
-This kit uses the **actual supplied logo**. No text-art reconstruction or AI redraw is involved.
+This repository tests whether the **exact original face logo** can be copied into Apple Messages as **one inline emoji-like object**. It is not ASCII art or an attempt to register a new Unicode character.
 
-## Fastest test on the iPhone (no Mac, Xcode, or GitHub required)
+## Run it from an iPhone (no Mac needed)
 
-1. Open `Logo_White_800.png` (or the dark-ink variation) in Photos.
-2. Long press the face in the photo; choose **Add Sticker**.
-3. Open Messages and insert the saved sticker using the **Stickers section of the emoji keyboard** while typing a sentence.
-4. See whether it is inserted inline. A sticker is not guaranteed to be encoded as a native `NSAdaptiveImageGlyph` even when it is displayed inline.
+1. Open **[the test webpage](https://jrdn-r.github.io/ChatGPTs-Gay-Little-Experiment/)** in Safari. (It will only load after GitHub Pages has been enabled and the deployment workflow has succeeded.)
+2. Tap **Select full line**, then use the iOS **Copy** menu. Alternatively try **Try copy** or **Copy rich HTML**.
+3. Open an iMessage conversation, paste into the typing field, then send it to a second compatible iPhone.
+4. Check whether the logo remains **inline like one emoji** or is converted to a normal picture or plain text. That's the actual pass/fail test.
 
-The image files contain real transparency. White line-art is intended primarily for dark backgrounds; dark-ink variation is for light backgrounds. The exact outlines are retained.
+### One-time GitHub Pages setting
 
-## Native NSAdaptiveImageGlyph test (experimental)
+The conversion runs automatically on every relevant push, but Pages sometimes needs one manual setup step:
 
-This kit includes `LogoGlyphLab.swift`, which uses the public APIs ImageIO, UIKit, and UniformTypeIdentifiers to:
+- Open [repository Settings → Pages](https://github.com/JRDN-R/ChatGPTs-Gay-Little-Experiment/settings/pages).
+- Under **Build and deployment**, set **Source = GitHub Actions** (not "Deploy from a branch").
+- Save if prompted. Then open [Actions](https://github.com/JRDN-R/ChatGPTs-Gay-Little-Experiment/actions/workflows/build-glyph.yml) and use **Run workflow** if an earlier deployment failed.
+- When the action succeeds, load the [iPhone test page](https://jrdn-r.github.io/ChatGPTs-Gay-Little-Experiment/).
 
-1. Load `Logo_White_160.png`.
-2. Encode HEIC with XMP metadata, including a stable `tiff:DocumentName` identifier.
-3. Call `NSAdaptiveImageGlyph(imageContent:)` and confirm the API does not discard the data.
-4. Insert the glyph in a `UITextView` with `supportsAdaptiveImageGlyph = true`.
-5. Test **three** ways of copying: native UITextView selection, flat RTFD rich-only pasteboard, flat RTFD plus text fallback.
-6. Export the generated HEIC for inspection.
+No secret API key or Apple Developer account is required for this **browser experiment**. The public GitHub Pages site and logo files are publicly accessible.
 
-**To run on iPhone:** On a Mac running Xcode 16 or later, create a new SwiftUI iOS App (minimum iOS 18), replace the generated App file with `LogoGlyphLab.swift`, and add `Logo_White_160.png` as a regular bundled resource (check the app target membership). Build and run on an iPhone. Test copying the face from the app into Messages. 
+## What GitHub Actions does
 
-The native test app is **not** a signed/installable IPA. It requires a build/signing environment to deploy to iPhone. The code has not been compiled or tested here on an Apple device.
+The workflow [`.github/workflows/build-glyph.yml`](.github/workflows/build-glyph.yml) performs:
 
-## Generate metadata-enriched HEIC in a Mac or GitHub Actions
+1. Run `make_glyph_heic.swift` on a hosted **macOS 15** machine to encode `Logo_White_160.png` into `Logo_AdaptiveGlyph.heic`.
+2. Call `NSAdaptiveImageGlyph(imageContent:)` to check whether Apple's text system recognizes the HEIC.
+3. Upload a downloadable build artifact, named `experimental-apple-adaptive-glyph`.
+4. Deploy `index.html` plus the image files to GitHub Pages.
 
-On a Mac running macOS 15 or newer:
+The Swift conversion is an experimental application of an independent [developer finding](https://zenn.dev/noppe/scraps/e08ce9a5a2c355), which suggests a HEIC can be recognized if it has `tiff:DocumentName` metadata. Apple does not document arbitrary PNG-to-Genmoji creation as a general public feature.
 
-```sh
-swift make_glyph_heic.swift Logo_White_160.png Logo_AdaptiveGlyph.heic
-```
+**Critical limitation:** Recognition as `NSAdaptiveImageGlyph` by macOS does **not** prove that Safari can put that glyph onto the iOS clipboard, nor that Messages will retain it when pasted. The browser copy test is deliberately experimental.
 
-This Mac script will attempt to validate the result using `NSAdaptiveImageGlyph` itself. It must run on Apple OS APIs. As an alternative, the included `.github/workflows/build-glyph.yml` can generate it in GitHub Actions with a `macos-15` runner. Upload the kit files to a **new repository**, then run the workflow from the Actions tab; download the resulting `experimental-adaptive-glyph` artifact. The example workflow assumes the root of that repository contains `Logo_White_160.png`, `make_glyph_heic.swift`, and the `.github` directory.
+## If Safari only pastes a normal image or text
 
-You can place `Logo_AdaptiveGlyph.heic` alongside `safari-copy-test.html` and `Logo_White_320.png` on static HTTPS hosting (such as GitHub Pages) to try the `<picture><source type="image/x-apple-adaptive-glyph">` markup in Safari. Use long-press / Select All / Copy to see how Messages handles the result. **This clipboard behavior is experimental and cannot be confirmed from this environment.**
+The fallback is a **native iOS test app**, because native `UITextView` and `UIPasteboard` can handle attributed text containing the `NSAdaptiveImageGlyph` attribute. The source `LogoGlyphLab.swift` is included for this experiment. An installable signed iOS app requires an iOS build/signing and distribution route; downloading a .swift or .heic file onto an iPhone does not install one. No signed IPA/TestFlight app is being provided by this repository yet.
 
-## Why this is plausible, but unconfirmed
+## Project files
 
-- Apple documents that `NSAdaptiveImageGlyph` handles inline images with metadata and can serialize through rich-text formats.
-- A 2024 independent experiment by `noppe` showed that metadata-enriched HEIC generated from an ordinary PNG can be recognized as `NSAdaptiveImageGlyph`; a `tiff:DocumentName` UUID appeared sufficient in their test. This behavior is **not a documented API contract**.
-- A HEIC image by itself is not a universal Unicode symbol. Even if Messages accepts it, sharing outside rich-text-aware apps may fall back to an image or other representation.
-- The Mac GitHub Actions workflow and iOS Swift sample were prepared but not executed here; results on iOS 27 remain unverified.
+| File | Purpose |
+|---|---|
+| `index.html` | iPhone-facing Safari test webpage |
+| `.github/workflows/build-glyph.yml` | Generates HEIC and deploys webpage |
+| `make_glyph_heic.swift` | Mac-compatible HEIC encoder and recognition check |
+| `Logo_White_160.png` | Transparent 160×160 source for HEIC |
+| `Logo_White_320.png` | Larger inline fallback image |
+| `Logo_DarkInk_800.png` | Contrast preview on light background |
+| `LogoGlyphLab.swift` | Experimental SwiftUI/UITextView iOS app source |
+| `safari-copy-test.html` | Earlier minimal web copy trial |
 
-Sources:
-- https://developer.apple.com/documentation/uikit/nsadaptiveimageglyph
-- https://developer.apple.com/videos/play/wwdc2024/10220/
-- https://zenn.dev/noppe/scraps/e08ce9a5a2c355
-- https://chromium.googlesource.com/external/github.com/WebKit/webkit/+/e78e1b72a759be2e387bf71c9652059c3d8d0363/Tools/TestWebKitAPI/Tests/WebKit/WKWebView/AdaptiveImageGlyph.mm
+## References
+
+- [Apple: NSAdaptiveImageGlyph](https://developer.apple.com/documentation/uikit/nsadaptiveimageglyph)
+- [Apple/WebKit adaptive image glyph tests](https://chromium.googlesource.com/external/github.com/WebKit/webkit/+/e78e1b72a759be2e387bf71c9652059c3d8d0363/Tools/TestWebKitAPI/Tests/WebKit/WKWebView/AdaptiveImageGlyph.mm)
+- [Independent developer's HEIC metadata experiment](https://zenn.dev/noppe/scraps/e08ce9a5a2c355)
+
+The goal is to **test and measure**, not claim that Apple's Messages app accepts user-built emoji as universal text characters.
