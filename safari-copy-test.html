@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<title>Logo Adaptive Image Glyph Test</title>
+<style>
+:root { font: 16px -apple-system, BlinkMacSystemFont, system-ui, sans-serif; color-scheme: dark light; }
+* { box-sizing:border-box }
+body { max-width: 580px; margin: 0 auto; padding: 20px 16px 50px; line-height: 1.5; }
+h1 { font-size: 1.55rem; margin-bottom: 2px }
+.intro { color: #9a9ba0; margin-top:0; }
+.preview { border-radius: 14px; background:#181a20; text-align:center; padding:16px; }
+.preview img { height:130px; width:130px; object-fit:contain }
+.editor { margin:12px 0; padding: 12px 14px; border-radius:12px; background:#202127;
+  border:1px solid #4c4f58; color:white; font-size:26px; line-height:2.1; min-height:88px; }
+.editor picture { display:inline; vertical-align:middle }
+.editor img { width:1.12em; height:1.12em; object-fit:contain; vertical-align: -0.18em; }
+button { border:0; background:#2678de; color:white; font:inherit; padding:11px 16px; border-radius:10px; cursor:pointer; }
+.secondary { background:#383942; }
+.small { font-size: .9rem; opacity:.8 }
+code { overflow-wrap:anywhere }
+@media(prefers-color-scheme:light) { .intro {color:#686a70;} }
+</style>
+</head>
+<body>
+<h1>Logo adaptive glyph trial</h1>
+<p class="intro">Safari experiment: copy the face inline with the adjacent text and paste into Messages.</p>
+<div class="preview"><img src="Logo_White_320.png" alt="Winking face logo"></div>
+<p id="state" role="status">Checking for the generated HEIC file…</p>
+<p><strong>Copy this line:</strong></p>
+<div id="editor" class="editor" contenteditable="true" role="textbox" aria-label="Copy example line">Here's my logo <picture id="logoPic"><img src="Logo_White_320.png" alt="Winking face icon"></picture> cool, right?</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+  <button type="button" onclick="selectText()">Select entire line</button>
+  <button type="button" class="secondary" onclick="copySelection()">Attempt Copy</button>
+</div>
+<p class="small">For the most reliable test, press and hold inside the text box, tap Select All, then Copy. Paste directly into an iMessage composition field. This is an experiment: Safari might preserve a glyph, paste an ordinary image, or paste only text.</p>
+<p class="small">This page deliberately uses native WebKit's <code>&lt;picture&gt;</code> element with <code>type="image/x-apple-adaptive-glyph"</code> if the HEIC exists; this markup is documented in Apple's WebKit implementation and examples.</p>
+<script>
+function selectText() {
+  const node=document.querySelector('#editor'),sel=window.getSelection(),range=document.createRange();
+  range.selectNodeContents(node);sel.removeAllRanges();sel.addRange(range);
+  document.querySelector('#state').textContent='Selected the whole line. Use the system Copy menu to preserve rich content.';
+}
+function copySelection() {
+  selectText();
+  let succeeded=false;
+  try{succeeded=document.execCommand('copy')}catch(e){}
+  document.querySelector('#state').textContent=succeeded?'Copy command returned success; test by pasting into Messages.':'The copy command was not accepted. Long-press, Select All, then Copy instead.';
+}
+async function setup() {
+  try {
+    const response=await fetch('Logo_AdaptiveGlyph.heic', {method:'HEAD',cache:'no-store'});
+    if (!response.ok) throw new Error('HEIC file not hosted');
+    const pic=document.querySelector('#logoPic');
+    const src=document.createElement('source');src.setAttribute('srcset','Logo_AdaptiveGlyph.heic');
+    src.setAttribute('type','image/x-apple-adaptive-glyph');
+    pic.insertBefore(src,pic.firstChild);
+    document.querySelector('#state').textContent='HEIC source found. Testing WebKit adaptive-glyph markup; clipboard transfer still unverified.';
+  } catch(e) {
+    document.querySelector('#state').textContent='PNG fallback only. Generate the HEIC in macOS/GitHub Actions and place it alongside this HTML file to test native WebKit glyph behavior.';
+  }
+}
+setup();
+</script>
+</body>
+</html>
