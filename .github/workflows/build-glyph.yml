@@ -1,0 +1,70 @@
+name: Build and test Apple adaptive image glyph
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/build-glyph.yml'
+      - 'make_glyph_heic.swift'
+      - 'Logo_White_160.png'
+      - 'Logo_White_320.png'
+      - 'Logo_DarkInk_800.png'
+      - 'index.html'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: adaptive-glyph-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Generate HEIC on a hosted Mac
+    runs-on: macos-15
+    steps:
+      - name: Check out files
+        uses: actions/checkout@v4
+
+      - name: Generate and verify adaptive glyph HEIC
+        run: swift make_glyph_heic.swift Logo_White_160.png Logo_AdaptiveGlyph.heic
+
+      - name: Prepare mobile test page
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s Logo_AdaptiveGlyph.heic
+          mkdir -p site
+          cp index.html site/index.html
+          cp Logo_White_320.png Logo_DarkInk_800.png Logo_AdaptiveGlyph.heic site/
+          touch site/.nojekyll
+          echo 'The experimental glyph file was generated.'
+          ls -lh site/
+
+      - name: Save downloadable HEIC artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: experimental-apple-adaptive-glyph
+          path: Logo_AdaptiveGlyph.heic
+          if-no-files-found: error
+
+      - name: Package GitHub Pages website
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+  deploy:
+    name: Publish iPhone test page
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Deploy site to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
